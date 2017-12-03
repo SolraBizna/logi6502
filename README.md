@@ -59,11 +59,7 @@ To reduce unnecessary logic, the following inputs act as if pulled high when lef
 
 The W65C02S updates its outputs after the *rising* edge of the clock. When reading, it reads D on the *falling* edge of the clock. When writing, it expects the values it has exposed on D to be written at the *falling* edge of the clock.
 
-Most Logisim parts can be configured to update on the falling edge. However, the RAM part cannot; it is only triggered on the "rising edge", no matter what. The incoming clock signal must be inverted. In addition, the sel/ld pins are a little weird; sel means "don't ignore clock edges" and ld means "output the current value on D".
-
-Here is an example of glue logic that allow interfacing a RAM part with a W65C02S. It uses AND gates to control the sel/ld pins. It assumes there is a Chip Select signal, made by additional glue logic, that is 1 if this RAM is being addressed and 0 otherwise. (It also uses a 1:1 splitter to choose the A pins that are relevant to this part; this particular RAM part's addresses are 14 bits, but the W65C02S address bus is 16 bits.)
-
-![Example circuit diagram.](images/andand.png)
+Most Logisim parts can be configured to update on the falling edge. However, the RAM part cannot; it is only triggered on the "rising edge", no matter what. The incoming clock signal must be inverted. Fortunately, the "ld" pin has the same meaning as the W65C02S's RWB pin, you can hook it up directly.
 
 ## Demo Circuit
 
