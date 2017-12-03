@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Library-Class: name.bizna.logi6502.Components
+

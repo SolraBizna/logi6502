@@ -1,0 +1,283 @@
+.MEMORYMAP
+DEFAULTSLOT  0
+SLOT 0 $8000 $8000
+.ENDME
+.ROMBANKSIZE $8000
+.ROMBANKS 1
+.MACRO STP
+.DB $DB
+.ENDM
+.MACRO WAI
+.DB $CB
+.ENDM
+
+.DEFINE r_KeyboardInput $4000
+.DEFINE r_ScreenOutput $4000
+
+.ENUM $0000
+_outstr_addr DW
+g_playerHP DB
+g_playerPotions DB
+g_enemyHP DB
+.ENDE
+; We fib slightly to the player to simplify the program's logic. Hitpoints are
+; stored in units of 10, and a zero is added after the fact by the display
+; code.
+; The maximums, healing values, etc. are also hardcoded into strings, so watch
+; out for that if you want to change these. Likewise, watch out if you want to
+; give the player 100 or more HP, or increase the enemy's HP even further.
+.DEFINE PLAYER_MAX_HP 5
+.DEFINE PLAYER_STARTING_POTIONS 3
+.DEFINE PLAYER_POTION_HEAL 3
+.DEFINE ENEMY_MAX_HP 10
+
+.ORGA $fffa
+.SECTION "!Interrupts" FORCE
+.DW rti, reset, irq
+.ENDS
+
+.ORG 0
+.SECTION "Main"
+irq:
+rti:
+	RTI
+
+_outstr:
+	PHY
+	LDY #0
+-	LDA (_outstr_addr),Y
+	BEQ +
+	STA $4000
+	INY
+	BRA -
++	PLY
+	RTS
+
+.MACRO outstr
+	PHA
+	LDA #<\1
+	STA _outstr_addr
+	LDA #>\1
+	STA _outstr_addr+1
+	JSR _outstr
+	PLA
+.ENDM
+
+restartGame:
+	; Clear the stack of any leftover subroutine calls, preserved
+	; registers, etc. We are starting from scratch.
+	LDX #$FF
+	TXS
+	INX
+	BRA startGame
+
+reset:
+	; initialize the processor
+	LDX #$FF
+	TXS
+	; also clear the tty
+	; (writing any value with the high bit set will clear the TTY)
+	STX r_ScreenOutput
+	INX ; will leave X as 0, but be one by smaller than LDX #0
+	LDY #0
+	LDA #0
+	; clear the keyboard buffer just in case
+	; (writing 0 clears the buffer)
+	STZ r_KeyboardInput
+startGame:
+	; initialize the game state
+	LDA #PLAYER_MAX_HP
+	STA g_playerHP
+	LDA #PLAYER_STARTING_POTIONS
+	STA g_playerPotions
+	LDA #ENEMY_MAX_HP
+	STA g_enemyHP
+	; Ready!
+	outstr s_Welcome
+mainloop:
+	JSR showStatus
+	JSR checkGameEndCondition
+	JSR getInput
+	BRA mainloop
+
+showStatus:
+	outstr s_StatusPart1
+	LDA g_playerHP
+	BEQ + ; skip outputting a digit if it's 0
+	ORA #$30 ; will turn any value from 0-9 into an ASCII digit
+	STA r_ScreenOutput
++	outstr s_StatusPart2
+	LDA g_playerPotions
+	BEQ @noPotions
+	CMP #1
+	BEQ @onePotion
+@manyPotions:
+	ORA #$30
+	STA r_ScreenOutput
+	BRA @finishWritingPotions
+@onePotion:
+	outstr s_OnePotion
+	BRA @wrotePotions
+@noPotions:
+	; This is much faster and more compact than calling outstr, because
+	; the string is so short
+	LDA #'n'
+	STA r_ScreenOutput
+	LDA #'o'
+	STA r_ScreenOutput
+@finishWritingPotions:
+	outstr s_SomePotions
+@wrotePotions:
+	outstr s_StatusPart3
+	LDA g_enemyHP
+	BEQ @wroteEnemyHP
+	CMP #10
+	BCS @enemyHPHasMultipleDigits
+@enemyHPHasOneDigit:
+	ORA #$30
+	STA r_ScreenOutput
+	BRA @wroteEnemyHP
+@enemyHPHasMultipleDigits:
+	; This only happens when the enemy has exactly 100 hitpoints, so we
+	; hardcode that outcome. (This is bad practice, but this sort of thing
+	; is part of the 8-bit assembly territory.)
+	LDA #'1'
+	STA r_ScreenOutput
+	DEA ; save one byte and no cycles o_O
+	STA r_ScreenOutput
+@wroteEnemyHP:
+	outstr s_StatusPart4
+	RTS
+
+; Thanks to the embedded strings, this routine is big enough that you can't
+; always use branches to get around.
+checkGameEndCondition:
+	LDA g_playerHP
+	BNE @playerIsAlive
+@playerIsDead:
+	LDA g_enemyHP
+	BNE @playerLostNormally
+@mutualDestruction:
+	outstr s_MutualDestruction
+	BRA @gameOver
+@playerLostNormally:
+	outstr s_YouDied
+@gameOver:
+	outstr s_GameOver
+@pressEnterToRestart:
+	JSR waitForEnter
+	JMP restartGame
+@playerIsAlive:
+	LDA g_enemyHP
+	BEQ @playerWon
+	RTS
+@playerWon:
+	outstr s_YouWon
+	BRA @pressEnterToRestart
+
+getInput:
+	outstr s_Prompt
+	; Clear the keyboard buffer (uncomment if you don't want to be able to
+	; buffer inputs)
+	;STZ r_KeyboardInput
+	; Wait for some key to be pressed
+-	WAI
+	LDA r_KeyboardInput
+	CMP #'a'
+	BEQ playerAttacks
+	CMP #'p'
+	BEQ playerDrinks
+	CMP #'r'
+	BEQ playerRestarts
+	BRA -
+	; we "return" by passing control directly to another subroutine
+	; (whoever we branch to is responsible for echoing back the player's
+	; choice)
+
+playerRestarts:
+	LDA #'r'
+	STA r_ScreenOutput
+	LDA #10
+	STA r_ScreenOutput
+	JMP restartGame
+
+playerAttacks:
+	outstr s_Attack
+	DEC g_enemyHP
+	BRA enemyAttacks
+
+playerDrinks:
+	DEC g_playerPotions
+	BMI @noPotions ; if it became negative, we had none
+	outstr s_DrinkPotion
+	LDA g_playerHP
+	; almost always CLC before adding
+	CLC
+	ADC #PLAYER_POTION_HEAL
+	CMP #PLAYER_MAX_HP+1
+	BCC @wastedNone
+	outstr s_WastedPotion
+	LDA #5
+@wastedNone:
+	STA g_playerHP
+	BRA enemyAttacks
+@noPotions:
+	outstr s_OutOfPotions
+	STZ g_playerPotions ; fix the value we corrupted before coming here
+	RTS
+
+enemyAttacks:
+	outstr s_GotAttacked
+	DEC g_playerHP
+	RTS
+
+waitForEnter:
+	; Clear the keyboard buffer
+	STZ r_KeyboardInput
+	; Wait for the enter key to be pressed
+-	WAI
+	LDA r_KeyboardInput
+	CMP #10
+	BNE -
+	; Done
+	RTS
+
+; and here are all the strings
+s_Welcome:
+.DB 10, "       Welcome to Fight!", 10, 10, 0
+s_StatusPart1:
+.DB "You: ", 0
+s_StatusPart2:
+.DB "0/50HP, ", 0
+s_OnePotion:
+.DB "one potion", 10, 0
+s_SomePotions:
+.DB " potions", 10, 0
+s_StatusPart3:
+.DB "Enemy: ", 0
+s_StatusPart4:
+.DB "0/100", 10, 10, 0
+s_MutualDestruction:
+.DB "You slew your foe, but were", 10, "fatally wounded by his final", 10, "blow...", 10, 0
+s_YouDied:
+.DB "You died...", 10, 0
+s_GameOver:
+.DB "Game over. Press enter to try", 10, "again.", 10, 0
+s_YouWon:
+.DB "Your foe is vanquished! You are", 10, "victorious!", 10, "Press enter to play again.", 10, 0
+s_Prompt:
+.DB "What will you do?", 10, "a = attack, p = drink potion,", 10, "r = start over", 10, "> ", 0
+s_GotAttacked:
+.DB "The enemy attacks you, dealing", 10, "10 damage.", 10, 0
+s_WastedPotion:
+.DB "Some of it was wasted!", 10, 0
+; These are in response to the prompt... note that we echo back the letter the
+; player typed to get here
+s_Attack:
+.DB "a", 10, 10, "You attack, dealing 10 damage.", 10, 0
+s_OutOfPotions:
+.DB "p", 10, 10, "You don't have any potions to", 10, "drink.", 10, 0
+s_DrinkPotion:
+.DB "p", 10, 10, "You drink a potion, healing", 10, "30 HP.", 10, 0
+
+.ENDS
