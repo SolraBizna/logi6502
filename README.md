@@ -10,7 +10,7 @@ It is *probably* accurate down to each individual bus cycle, which pins change s
 
 Download `logi6502.jar` and put it somewhere. Open Logisim. With a project opened, go to Project → Load Library → JAR Library, and select `logi6502.jar`. There should now be a new category of tools called "W65C02S". Inside it are three different versions of the W65C02S.
 
-The demo circuit shown on top of the page is in `demo.circ`. Open it, make sure Simulate → Ticks Enabled is checked, and set Simulate → Tick Frequency to some high value. See [#demo-circuit](Demo Circuit) for more information.
+The demo circuit shown on top of the page is in `demo.circ`. Open it, make sure Simulate → Ticks Enabled is checked, and set Simulate → Tick Frequency to some high value. See [Demo Circuit](#demo-circuit) for more information.
 
 ## Versions
 
