@@ -4,11 +4,21 @@ This is a component library for Dr. Carl Burch's excellent program [Logisim](htt
 
 With this component library, you can design circuits that are intended to interface with a bare W65C02S. You can also use it to design and explore low-level computer architectures that would not have been out of place in the 70's and 80's.
 
-It is *probably* accurate down to each individual bus cycle, which pins change state when and why, etc. However, I have not yet acquired a real W65C02S to test against, and WDC's datasheets can be vague, contradictory, and occasionally outright erroneous. Caveat programmer.
+It is *fairly* accurate, but:
+
+- Interrupt timing is a few cycles off
+- There are inaccuracies in rarely-used operations (such as decimal math)
+
+In addition:
+
+> A real 65xx latches data and changes bus status on the falling edge of the clock. The one simulated here latches data on the falling edge (correct) but changes bus status on the rising edge (incorrect).  
+> (issue #1)
+
+Thanks to [65test](https://github.com/SolraBizna/65test), I have fully reverse engineered the black box behavior of the W65C02S, but I haven't had time to update this emulator with what I found.
 
 # Usage
 
-Download `logi6502.jar` and put it somewhere. Open Logisim. With a project opened, go to Project → Load Library → JAR Library, and select `logi6502.jar`. There should now be a new category of tools called "W65C02S". Inside it are three different versions of the W65C02S.
+Download `logi6502.jar` (perhaps from the [releases page](https://github.com/SolraBizna/logi6502/releases)) and put it somewhere. Open Logisim. With a project opened, go to Project → Load Library → JAR Library, and select `logi6502.jar`. There should now be a new category of tools called "W65C02S". Inside it are three different versions of the W65C02S.
 
 The demo circuit shown on top of the page is in `demo.circ`. Open it, make sure Simulate → Ticks Enabled is checked, and set Simulate → Tick Frequency to some high value. See [Demo Circuit](#demo-circuit) for more information.
 
