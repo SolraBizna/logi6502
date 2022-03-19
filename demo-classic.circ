@@ -8,7 +8,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
   <lib desc="#Memory" name="4"/>
   <lib desc="#I/O" name="5"/>
   <lib desc="#Base" name="6"/>
-  <lib desc="jar#out/artifacts/logi6502_jar/logi6502.jar#name.bizna.logi6502.Components" name="7"/>
+  <lib desc="jar#logi6502-classic.jar#name.bizna.logi6502.Components" name="7"/>
   <main name="main"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
