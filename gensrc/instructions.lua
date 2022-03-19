@@ -556,7 +556,7 @@ function instructions.WAI(flags, am)
    out[[
 parent.setRDY(cis, false);
 $$$
-if(!parent.getIRQB(cis) && !(parent.getNMIB(cis) && !previousNMI)) --stage;
+parent.setRDY(cis, true);
 $$$
 ]]
 end

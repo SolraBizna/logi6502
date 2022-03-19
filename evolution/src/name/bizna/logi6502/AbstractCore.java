@@ -168,8 +168,10 @@ public abstract class AbstractCore {
         if(isResetting)
             reset(cis);
         boolean isReady = parent.getRDY(cis);
-        if(!isReady && !stopped && fetchedOpcode == 0xCB && stage == 2) {
-            parent.setRDY(cis, true);
+        if(!isReady && !stopped && fetchedOpcode == (byte)0xCB && stage == 2) {
+	    if(parent.getIRQB(cis) || (parent.getNMIB(cis) && !previousNMI)) {
+		parent.setRDY(cis, true);
+	    }
         }
         if(stopped || !isReady) return;
         this.cis = cis;

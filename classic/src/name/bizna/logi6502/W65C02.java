@@ -2504,7 +2504,7 @@ switch(stage) {
 case 1: {--pc;
 parent.setRDY(cis, false);
 break; } case 2: {
-if(!parent.getIRQB(cis) && !(parent.getNMIB(cis) && !previousNMI)) --stage;
+parent.setRDY(cis, true);
 break; } case 3: {
 } default: stage = -1; if(true) return; } break;
     case (byte)204:
