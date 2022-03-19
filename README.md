@@ -100,9 +100,35 @@ Reading or writing any byte in the `$4000-$7FFF` region is an IO read. The low 1
 - **NMI**: Signals an NMI when pressed.
 - **Reset**: Resets the CPU and all support hardware when pressed.
 
+# Building
+
+To build from source, you will require a Java compiler and GNU Make. If you're building on Windows, this will mean getting a UNIXy environment such as Cygwin, MinGW, or WSL. If you want to change the source code, you will also need Lua 5.3 or later. **Make sure you're editing the files in `src/`, not `classic/src/` or `evolution/src/`!** The files in the deeper directories are generated automatically!
+
+To build, just say `make` (or `gmake` if that's what GNU Make is called on your system) and pass it the name of the jar you want to build:
+
+```sh
+make logi6502-classic.jar
+make logi6502-evolution.jar
+```
+
+This will only work if you keep your Logisim JARs in your Downloads folder, and all your versions match. If you don't, you have to specify the JAR paths on the command line:
+
+```sh
+make logi6502-classic.jar LOGISIM_CLASSIC_PATH=/wherever/you/put/logisim-generic-2.7.1.jar
+make logi6502-evolution.jar LOGISIM_EVOLUTION_PATH=/wherever/you/put/logisim-evolution-3.7.2-all.jar
+```
+
+If you want to build both at once, you can specify both jars on the command line, with or without path specifications:
+
+```sh
+make logi6502-classic.jar logi6502-evolution.jar LOGISIM_CLASSIC_PATH=/wherever/you/put/logisim-generic-2.7.1.jar LOGISIM_EVOLUTION_PATH=/wherever/you/put/logisim-evolution-3.7.2-all.jar
+```
+
+If you want to develop changes using your favorite Java IDE... uh, good luck. Java, by design, does not include conditional compilation, so your IDE *will* get cranky about the hack I added to support it.
+
 # Copying
 
-Copyright (c) 2017, Solra Bizna.
+Copyright (c) 2017, 2022, Solra Bizna.
 
 Logi6502 is free software; you can redistribute it and/or modify it under the terms of the [GNU General Public License](LICENSE.md) as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
