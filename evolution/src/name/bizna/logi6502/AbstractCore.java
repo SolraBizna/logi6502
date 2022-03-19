@@ -174,7 +174,7 @@ public abstract class AbstractCore {
         if(stopped || !isReady) return;
         this.cis = cis;
         if(!clockIsHigh && previousClock) {
-            // falling edge
+            // falling edge! go!
             boolean so = parent.getSOB(cis);
             if(so != previousSO) {
                 if(so)
@@ -208,9 +208,7 @@ public abstract class AbstractCore {
                     if(stage >= 0) ++stage;
                 }
             } while(stage < 0 && !stopped);
-        }
-        else if(clockIsHigh && !previousClock) {
-            // rising edge, apply outputs
+	    // all finished, let's update our bus signals
             if(intendedRWB)
                 parent.doRead(cis, intendedA);
             else
