@@ -1,4 +1,4 @@
-#!/usr/bin/env lua5.3
+#!/usr/bin/env lua
 
 dofile("gensrc/addressing_modes.lua")
 dofile("gensrc/instructions.lua")

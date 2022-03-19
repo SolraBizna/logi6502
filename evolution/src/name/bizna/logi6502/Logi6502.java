@@ -77,10 +77,10 @@ public abstract class Logi6502 extends InstanceFactory {
                 port = new Port(LEFT_X, PIN_START_Y + pinPerSide * PIXELS_PER_PIN, info.type, info.bitWidth, info.exclusive);
             port.setToolTip(new StringGetter() {
 		    /*classic*/
-		    @Override
-		    public String get() {
-			return info.name;
-		    }
+//		    @Override
+//		    public String get() {
+//			return info.name;
+//		    }
 		    /*/classic*/
 		    /*evolution*/
 		    @Override

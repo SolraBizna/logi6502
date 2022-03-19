@@ -83,10 +83,10 @@ public abstract class Logi6502 extends InstanceFactory {
 		    }
 		    /*/classic*/
 		    /*evolution*/
-		    @Override
-		    public String toString() {
-			return info.name;
-		    }
+//		    @Override
+//		    public String toString() {
+//			return info.name;
+//		    }
 		    /*/evolution*/
             });
             ports.add(port);
