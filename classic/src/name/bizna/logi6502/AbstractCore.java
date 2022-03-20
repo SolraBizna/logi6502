@@ -167,10 +167,12 @@ public abstract class AbstractCore {
     public void goh(InstanceState cis, boolean isResetting, boolean clockIsHigh) {
         if(isResetting)
             reset(cis);
-        boolean isReady = parent.getRDY(cis);
+        boolean isReady = parent.getRDY(cis)
+	    && (fetchedOpcode != (byte)0xCB || stage != 2);
         if(!isReady && !stopped && fetchedOpcode == (byte)0xCB && stage == 2) {
 	    if(parent.getIRQB(cis) || (parent.getNMIB(cis) && !previousNMI)) {
 		parent.setRDY(cis, true);
+		isReady = parent.getRDY(cis);
 	    }
         }
         if(stopped || !isReady) return;
