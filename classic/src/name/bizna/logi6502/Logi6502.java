@@ -66,7 +66,7 @@ public abstract class Logi6502 extends InstanceFactory {
     protected void addStandardPins(PortInfo[] portInfos, int LEFT_X, int RIGHT_X, int PIN_START_Y, int PIN_STOP_Y, int PIXELS_PER_PIN, int PINS_PER_SIDE) {
         ArrayList<Port> ports = new ArrayList<Port>(portInfos.length);
         for(int n = 0; n < portInfos.length; ++n) {
-            PortInfo info = portInfos[n];
+            final PortInfo info = portInfos[n];
             if(info == null) continue;
             boolean isRightSide = n >= PINS_PER_SIDE;
             int pinPerSide = isRightSide ? n - PINS_PER_SIDE : n;

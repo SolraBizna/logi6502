@@ -37,7 +37,7 @@ logi6502-classic.jar: $(CLASSIC_SOURCES) $(MANIFEST)
 	@echo "Creating $@..."
 	@javac --class-path "$(LOGISIM_CLASSIC_PATH)":classic/bin \
 		-d classic/bin -s classic/src $(CLASSIC_SOURCES) \
-		-Xlint:unchecked
+		-Xlint:unchecked -source 7 -target 7
 	@jar --create --file "$@" --manifest src/META-INF/MANIFEST.MF \
 		-C classic/bin .
 
@@ -51,7 +51,7 @@ logi6502-evolution.jar: $(EVOLUTION_SOURCES) $(MANIFEST)
 	@echo "Creating $@..."
 	@javac --class-path "$(LOGISIM_EVOLUTION_PATH)":evolution/bin \
 		-d evolution/bin -s evolution/src $(EVOLUTION_SOURCES) \
-		-Xlint:unchecked
+		-Xlint:unchecked -source 7 -target 7
 	@jar --create --file "$@" --manifest src/META-INF/MANIFEST.MF \
 		-C evolution/bin .
 
